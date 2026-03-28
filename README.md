@@ -21,6 +21,56 @@ from torchrl.data import ReplayBuffer, LazyTensorStorage
 from tensordict.nn import TensorDictModule, TensorDictSequential
 ```
 
+## Installation
+
+```bash
+# Clone the repository
+git clone <repo-url>
+cd autoresearch-dqn
+
+# Install dependencies (Python 3.10+)
+pip install torch torchrl tensordict gymnasium
+```
+
+## Running the autoresearch loop
+
+The project uses the [autoresearch pattern](https://github.com/uditgoenka/autoresearch) to autonomously iterate on the DQN implementation.
+
+### Single experiment (sequential loop)
+
+```bash
+# Run the current DQN implementation
+python dqn.py
+```
+
+The script prints training progress and ends with `METRIC: <avg_reward>` — the average reward over 5 evaluation episodes.
+
+### Parallel experiments
+
+Run 4 hyperparameter variants simultaneously and compare results:
+
+```bash
+python run_experiments.py
+```
+
+This generates 4 variant scripts with different single changes, runs them all in parallel, and reports which configuration achieved the best metric.
+
+### Autoresearch loop with Claude Code
+
+To run the full autonomous iteration loop:
+
+```bash
+# Install the autoresearch skill (https://github.com/uditgoenka/autoresearch)
+# Then invoke:
+/autoresearch
+Goal: DQN agent consistently achieves >=400 reward on CartPole-v1, ideally 500
+Scope: dqn.py
+Metric: Average eval reward (higher is better)
+Verify: python dqn.py 2>&1 | grep 'METRIC:' | tail -1 | awk '{print $2}'
+```
+
+The loop follows: **Modify -> Verify -> Keep/Discard -> Repeat** until the goal is achieved. Results are logged to `autoresearch-results.tsv`.
+
 ## Initial implementation
 
 ```python
