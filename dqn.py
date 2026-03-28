@@ -12,7 +12,7 @@ total_frames = 0
 for episode in range(500):
     env = gym.make("CartPole-v1")
     obs, _ = env.reset(seed=episode)
-    log_probs, rewards_ep = [], []
+    log_probs, rewards_ep, entropies = [], [], []
 
     for t in range(500):
         obs_t = torch.FloatTensor(obs)
@@ -20,6 +20,7 @@ for episode in range(500):
         dist = Categorical(logits=logits)
         action = dist.sample()
         log_probs.append(dist.log_prob(action))
+        entropies.append(dist.entropy())
         obs, reward, terminated, truncated, _ = env.step(action.item())
         rewards_ep.append(reward)
         total_frames += 1
@@ -36,7 +37,9 @@ for episode in range(500):
     returns = torch.FloatTensor(returns)
     returns = (returns - returns.mean()) / (returns.std() + 1e-8)
 
-    loss = -sum(lp * G for lp, G in zip(log_probs, returns))
+    policy_loss = -sum(lp * G for lp, G in zip(log_probs, returns))
+    entropy = torch.stack(entropies).mean()
+    loss = policy_loss - 0.01 * entropy
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
