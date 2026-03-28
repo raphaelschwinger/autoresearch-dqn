@@ -53,12 +53,12 @@ for i, batch in enumerate(collector):
 
     exploration_policy.step(frames=batch.numel())
 
-    if i % 10 == 0:
+    if i % 5 == 0:
         rewards = []
         with torch.no_grad():
-            for _ in range(5):
+            for _ in range(10):
                 rewards.append(env.rollout(max_steps=500, policy=policy)["next", "reward"].sum().item())
-        avg_reward = sum(rewards) / 5
+        avg_reward = sum(rewards) / 10
         best_avg_reward = max(best_avg_reward, avg_reward)
         print(f"Step {total_frames}: loss={loss['loss'].item():.3f}, reward={avg_reward:.1f}, eps={exploration_policy.eps:.3f}")
         if avg_reward >= 490:
