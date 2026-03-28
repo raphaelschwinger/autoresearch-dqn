@@ -28,7 +28,7 @@ collector = SyncDataCollector(
     total_frames=500_000,
 )
 
-buffer = ReplayBuffer(storage=LazyTensorStorage(max_size=50_000))
+buffer = ReplayBuffer(storage=LazyTensorStorage(max_size=100_000))
 loss_fn = DQNLoss(policy, action_space=env.action_spec)
 loss_fn.make_value_estimator(gamma=0.99)
 updater = SoftUpdate(loss_fn, tau=0.001)
@@ -40,7 +40,7 @@ for i, batch in enumerate(collector):
     buffer.extend(batch)
     total_frames += batch.numel()
 
-    if len(buffer) < 5000:
+    if len(buffer) < 10000:
         continue
 
     for _ in range(10):
