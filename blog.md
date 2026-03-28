@@ -1,5 +1,5 @@
 ---
-title: "From DQN to REINFORCE in 39 Iterations: Letting an AI Agent Optimize Its Own RL Algorithm"
+title: "Autoresearch RL algorithms to solve Cartpole"
 authors:
   - name: Raphael Schwinger
 date: 2026-03-28
@@ -10,22 +10,22 @@ license: CC-BY-4.0
 
 # From DQN to REINFORCE in 39 Iterations
 
-_Letting an AI agent optimize its own RL algorithm on CartPole-v1 using the autoresearch loop._
+_Letting an AI agent optimize an RL algorithm on CartPole-v1 using the autoresearch loop._
 
 ## The Idea
 
-What happens when you give an AI coding agent a reinforcement learning script and tell it to make it better --- autonomously, with no human in the loop?
+I recently checked out the [TorchRL Introduction](https://docs.pytorch.org/rl/stable/tutorials/torchrl_demo.html], while the library sounds amazing, I was a bit disappointed to not get an agent solving the simple environment. After tweaking the algorithm by myself a bit, I wondered what happens when you give an AI coding agent the script and tell it to make it better --- autonomously, with no human in the loop?
 
-That is the premise behind [autoresearch](https://github.com/karpathy/autoresearch), a pattern introduced by Andrej Karpathy in March 2026 {cite}`karpathy2026autoresearch`. The core loop is deceptively simple: **modify the code, run verification, keep if improved, discard if not, repeat**. Karpathy demonstrated this on LLM training, running 700 experiments in two days and discovering 20 optimizations that transferred to larger models.
+That is the premise behind [autoresearch](https://github.com/karpathy/autoresearch), a pattern introduced by Andrej Karpathy in March 2026 [@karpathy2026autoresearch]. The core loop is deceptively simple: **modify the code, run verification, keep if improved, discard if not, repeat**. Karpathy demonstrated this on LLM training, running 700 experiments in two days and discovering 20 optimizations that [transferred to larger models](https://x.com/karpathy/status/2031135152349524125).
 
-We applied this pattern --- via the [Claude Code autoresearch skill](https://github.com/uditgoenka/autoresearch) by Udit Goenka {cite}`goenka2026autoresearch` --- to a different domain: optimizing a Deep Q-Network (DQN) {cite}`mnih2013dqn` agent on the classic CartPole-v1 benchmark. The agent started with a baseline scoring 207.6 average reward and, after 39 iterations, arrived at a REINFORCE {cite}`williams1992reinforce` implementation achieving a perfect score of 500 in under 10 seconds --- a 43$\times$ reduction in required training frames.
+We applied this pattern --- via the [Claude Code autoresearch skill](https://github.com/uditgoenka/autoresearch) by Udit Goenka [@goenka2026autoresearch] --- to a different domain: optimizing a Deep Q-Network (DQN) [@mnih2013dqn] agent on the classic CartPole-v1 benchmark. The agent started with a baseline scoring 207.6 average reward and, after 39 iterations, arrived at a REINFORCE [@williams1992reinforce] implementation achieving a perfect score of 500 in under 10 seconds --- a 43$\times$ reduction in required training frames.
 
 ## The Setup
 
 The rules were straightforward:
 
 - **Goal:** achieve a perfect score of 500 on CartPole-v1, consistently $\geq 400$
-- **Constraint:** training + evaluation must complete in under 5 minutes
+- **Constraint:** training + evaluation must complete in under 5 minutes on a M1 Macbook
 - **Metric:** average reward over 5 evaluation episodes (higher is better)
 - **Scope:** a single Python file (`algorithm.py`)
 
@@ -46,11 +46,18 @@ Every experiment is committed _before_ verification, so `git revert` provides cl
 
 ## Phase 1: Optimizing DQN (Iterations 0--22)
 
-The initial implementation used TorchRL {cite}`bou2024torchrl` with a standard DQN setup: two-layer network (128 hidden units), $\varepsilon$-greedy exploration, replay buffer of 50,000 transitions, soft target updates ($\tau = 0.001$), and Adam optimizer at $\text{lr} = 10^{-4}$.
+The initial implementation used TorchRL [@bou2024torchrl] with a standard DQN setup: two-layer network (128 hidden units), $\varepsilon$-greedy exploration, replay buffer of 50,000 transitions, soft target updates ($\tau = 0.001$), and Adam optimizer at $\text{lr} = 10^{-4}$.
 
 **Baseline result: METRIC = 207.6.** The agent would briefly spike to $\sim$400 reward around step 241k, then catastrophically collapse back to $\sim$9.
 
 The first 22 iterations explored the DQN hyperparameter space:
+
+```{figure} progress.png
+:alt: Autoresearch DQN phase progress plot
+:width: 100%
+
+23 experiments on DQN hyperparameters. Green circles mark kept improvements; gray dots are discards. The staircase tracks the running best metric.
+```
 
 | Iteration | Change | METRIC | Status |
 |:---------:|--------|-------:|--------|
@@ -70,6 +77,13 @@ But the best DQN configuration still required $\sim$421,000 frames and about 3 m
 
 At iteration 23, we expanded the search space beyond DQN to include other RL algorithms. Four candidates were tested in parallel:
 
+```{figure} progress_phase2.png
+:alt: Autoresearch REINFORCE phase progress plot
+:width: 100%
+
+17 experiments optimizing REINFORCE. The y-axis (log scale) shows frames to convergence --- lower is better. Experiments that never converged float near the top.
+```
+
 | Algorithm | METRIC | Frames | Time |
 |-----------|-------:|-------:|-----:|
 | REINFORCE | **497.8** | **9,868** | **4.8s** |
@@ -77,7 +91,7 @@ At iteration 23, we expanded the search space beyond DQN to include other RL alg
 | DQN (aggressive) | 273.0 | 200,000 | 65.2s |
 | Double DQN | 236.0 | 300,000 | 91.9s |
 
-REINFORCE --- the simplest policy gradient algorithm, dating back to Williams (1992) {cite}`williams1992reinforce` --- crushed DQN by achieving near-perfect reward in **43$\times$ fewer frames**. The entire implementation is under 80 lines of pure PyTorch:
+REINFORCE --- the simplest policy gradient algorithm, dating back to Williams (1992) [@williams1992reinforce] --- crushed DQN by achieving near-perfect reward in **43$\times$ fewer frames**. The entire implementation is under 80 lines of pure PyTorch:
 
 ```python
 policy = nn.Sequential(nn.Linear(4, 128), nn.ReLU(), nn.Linear(128, 2))
@@ -102,7 +116,7 @@ The only improvement that stuck was evaluating every 5 episodes instead of 10 (i
 
 ### 1. Simpler algorithms win on simple problems
 
-CartPole has a 4-dimensional observation space and 2 actions. DQN's machinery --- replay buffers, target networks, $\varepsilon$-greedy schedules --- is designed for complex, high-dimensional environments like Atari {cite}`mnih2015humanlevel`. For CartPole, this machinery is pure overhead. REINFORCE's direct policy gradient is sufficient and dramatically more efficient.
+CartPole has a 4-dimensional observation space and 2 actions. DQN's machinery --- replay buffers, target networks, $\varepsilon$-greedy schedules --- is designed for complex, high-dimensional environments like Atari [@mnih2015humanlevel]. For CartPole, this machinery is pure overhead. REINFORCE's direct policy gradient is sufficient and dramatically more efficient.
 
 This is not a novel insight (any RL textbook will tell you this), but the autoresearch loop _rediscovered_ it empirically in 39 iterations without being told which algorithm to prefer.
 
@@ -132,68 +146,36 @@ The autoresearch loop's use of git as memory proved invaluable. Every experiment
 
 **39 iterations. 4 keeps. 34 discards. 0 crashes. One algorithm switch that changed everything.**
 
-The full experiment log, git history, and code are available in the [autoresearch-dqn repository](https://github.com/rschwinger/autoresearch-dqn).
+## Conclusion
 
-## References
+The autoresearch loop proved remarkably effective on CartPole-v1: 39 automated iterations rediscovered a textbook result --- that simple policy gradients outperform DQN on low-dimensional problems --- without any human guidance on algorithm selection. The agent explored, failed, backtracked, and ultimately converged on an 80-line REINFORCE implementation that solves the task in under 10 seconds.
+
+But CartPole is the simplest RL toy problem there is, the far more compelling question is whether this pattern scales. What happens when you point the autoresearch loop at sophisticated environments? These high-dimensional settings are where the real algorithmic design challenges live --- and where the search space of possible modifications explodes.
+
+The fundamental bottleneck is compute. Each CartPole experiment ran in seconds; a single Atari training run can take hours on a GPU. Exhaustive hyperparameter sweeps across RL algorithms and environments are already prohibitively expensive --- the HPO-RL-Bench project [@shala2024hporlbench] required pre-computing reward curves for six algorithms across 22 environments just to make hyperparameter research tractable without re-running training. An autoresearch loop that iterates hundreds of times on environments of that scale would demand cluster-level resources.
+
+This is where understanding scaling laws becomes critical. Recent work has shown that value-based deep RL follows predictable scaling behavior with respect to model size, replay ratio, and compute budget --- provided hyperparameters are set carefully [@rybkin2025scaling]. If similar predictability holds for the autoresearch pattern, one could screen algorithmic modifications cheaply on small-scale proxies and transfer the winners to full-scale training. Even without having Karpathy's or frontier labs resources available. Characterizing _when_ and _why_ small-scale RL improvements transfer --- and when they do not --- would transform autoresearch from a curiosity on toy problems into a practical tool for RL algorithm development at scale.
+
+
+
+
+## Citation 
+
+The full experiment log, git history, and code are available in the [autoresearch-dqn repository](https://github.com/rschwinger/autoresearch-dqn).
+```
+@misc{schwinger2026autoresearch-dqn,
+  title = {Autoresearch {RL} algorithms to solve Cartpole},
+  author = {Raphael Schwinger},
+  year = {2026},
+  howpublished = {Blog post},
+  url = {https://schwinger.dev/autoresearch-dqn},
+}
+```
+
+--- 
 
 ```{bibliography}
 :style: unsrt
 ```
 
----
 
-```{code-block} bibtex
-:filename: references.bib
-
-@misc{karpathy2026autoresearch,
-  author       = {Karpathy, Andrej},
-  title        = {autoresearch: {AI} agents running research on single-{GPU} nanochat training automatically},
-  year         = {2026},
-  howpublished = {\url{https://github.com/karpathy/autoresearch}},
-  note         = {Released March 7, 2026. 21,000+ GitHub stars within days of release.}
-}
-
-@misc{goenka2026autoresearch,
-  author       = {Goenka, Udit},
-  title        = {Claude Autoresearch Skill --- Autonomous goal-directed iteration for {Claude Code}},
-  year         = {2026},
-  howpublished = {\url{https://github.com/uditgoenka/autoresearch}},
-  note         = {Claude Code skill implementing the autoresearch loop pattern.}
-}
-
-@article{mnih2013dqn,
-  author  = {Mnih, Volodymyr and Kavukcuoglu, Koray and Silver, David and Graves, Alex and Antonoglou, Ioannis and Wierstra, Daan and Riedmiller, Martin},
-  title   = {Playing {Atari} with Deep Reinforcement Learning},
-  journal = {arXiv preprint arXiv:1312.5602},
-  year    = {2013}
-}
-
-@article{mnih2015humanlevel,
-  author  = {Mnih, Volodymyr and Kavukcuoglu, Koray and Silver, David and Rusu, Andrei A. and Veness, Joel and Bellemare, Marc G. and Graves, Alex and Riedmiller, Martin and Fidjeland, Andreas K. and Ostrovski, Georg and others},
-  title   = {Human-level control through deep reinforcement learning},
-  journal = {Nature},
-  volume  = {518},
-  number  = {7540},
-  pages   = {529--533},
-  year    = {2015},
-  doi     = {10.1038/nature14236}
-}
-
-@article{williams1992reinforce,
-  author  = {Williams, Ronald J.},
-  title   = {Simple statistical gradient-following algorithms for connectionist reinforcement learning},
-  journal = {Machine Learning},
-  volume  = {8},
-  number  = {3--4},
-  pages   = {229--256},
-  year    = {1992},
-  doi     = {10.1007/BF00992696}
-}
-
-@article{bou2024torchrl,
-  author  = {Bou, Albert and Bettini, Matteo and Dittert, Sebastian and Kumar, Vikash and Sodhani, Shagun and Yang, Xiaomeng and De Fabritiis, Gianni and Moens, Vincent},
-  title   = {{TorchRL}: A data-driven decision-making library for {PyTorch}},
-  journal = {arXiv preprint arXiv:2306.00577},
-  year    = {2024}
-}
-```
