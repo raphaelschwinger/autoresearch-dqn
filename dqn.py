@@ -39,6 +39,7 @@ for episode in range(500):
     loss = -sum(lp * G for lp, G in zip(log_probs, returns))
     optimizer.zero_grad()
     loss.backward()
+    torch.nn.utils.clip_grad_norm_(policy.parameters(), 1.0)
     optimizer.step()
 
     if episode % 5 == 0:
