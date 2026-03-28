@@ -14,7 +14,7 @@ _Letting an AI agent optimize an RL algorithm on CartPole-v1 using the autoresea
 
 ## The Idea
 
-I recently checked out the [TorchRL Introduction](https://docs.pytorch.org/rl/stable/tutorials/torchrl_demo.html], while the library sounds amazing, I was a bit disappointed to not get an agent solving the simple environment. After tweaking the algorithm by myself a bit, I wondered what happens when you give an AI coding agent the script and tell it to make it better --- autonomously, with no human in the loop?
+I recently checked out the [TorchRL Introduction](https://docs.pytorch.org/rl/stable/tutorials/torchrl_demo.html), while the library sounds amazing, I was a bit disappointed to not get an agent solving the simple environment. After tweaking the algorithm by myself a bit, I wondered what happens when you give an AI coding agent the script and tell it to make it better --- autonomously, with no human in the loop?
 
 That is the premise behind [autoresearch](https://github.com/karpathy/autoresearch), a pattern introduced by Andrej Karpathy in March 2026 [@karpathy2026autoresearch]. The core loop is deceptively simple: **modify the code, run verification, keep if improved, discard if not, repeat**. Karpathy demonstrated this on LLM training, running 700 experiments in two days and discovering 20 optimizations that [transferred to larger models](https://x.com/karpathy/status/2031135152349524125).
 
