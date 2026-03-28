@@ -6,7 +6,7 @@ import gymnasium as gym
 torch.manual_seed(0)
 
 policy = nn.Sequential(nn.Linear(4, 128), nn.ReLU(), nn.Linear(128, 2))
-optimizer = torch.optim.Adam(policy.parameters(), lr=1e-2)
+optimizer = torch.optim.Adam(policy.parameters(), lr=5e-3)
 
 total_frames = 0
 for episode in range(500):
