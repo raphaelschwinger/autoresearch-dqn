@@ -1,0 +1,42 @@
+# metric_direction: higher_is_better
+iteration	commit	metric	delta	guard	status	description
+0	2cb5664	207.6	0.0	-	baseline	initial DQN from README — unstable, peaks ~400 but collapses
+1	-	158.4	-49.2	-	discard	increase lr from 1e-4 to 5e-4 — more unstable, worse final metric
+2	-	468.6	+261.0	-	discard	[parallel] tau 0.001->0.005
+3	-	474.2	+266.6	-	discard	[parallel] lr 3e-4 + anneal 100k
+4	-	412.2	+204.6	-	discard	[parallel] wider net (256) + 20 grad steps
+5	13a9589	500.0	+292.4	-	keep	[parallel] double buffer (100k) + double warmup (10k) — PERFECT
+6	-	193.8	-306.2	-	discard	[parallel] lr 3e-4 on current best
+7	-	27.2	-472.8	-	discard	[parallel] faster anneal 30k + 200k total frames
+8	-	161.8	-338.2	-	discard	[parallel] tau 0.005 + lr 2e-4
+9	-	241.8	-258.2	-	discard	[parallel] 20 grad steps + batch 128
+10	-	500.0	0.0	-	discard	[parallel] eps_end 0.1 — also perfect but no speed gain
+11	-	183.2	-316.8	-	discard	[parallel] anneal 100k + lr 5e-4 — unstable
+12	-	346.4	-153.6	-	discard	[parallel] grad clip 1.0 + 20 grad steps
+13	7fe553a	500.0	0.0	-	keep	[parallel] 300k frames + tau 0.005 — same score, 40% faster
+14	-	245.2	-254.8	-	discard	confirmation run failed: 300k+tau0.005 not reproducible (METRIC=245.2 vs 500)
+15	-	270.0	-230.0	-	discard	[parallel] anneal 100k — too much exploration
+16	-	373.6	-126.4	-	discard	[parallel] gamma 0.999
+17	-	473.8	-26.2	-	discard	[parallel] fpb 500 + 5 grad steps
+18	-	276.4	-223.6	-	discard	eval every 5 batches / 10 ep — takes too much compute from training
+19	-	237.4	-262.6	-	discard	[parallel] clip 10 + lr 1e-3
+20	-	166.2	-333.8	-	discard	[parallel] batch 64 + 30 grad steps
+21	-	39.6	-460.4	-	discard	[parallel] warmup 5k + anneal 20k + eps 0.01
+22	6c821f9	500.0	0.0	-	keep	3-layer 64-unit network — confirmed METRIC=500
+23	-	497.8	-2.2	-	keep-candidate	[parallel] REINFORCE — 497.8 in 4.8s / 9868 frames!
+24	-	8.8	-491.2	-	discard	[parallel] PPO TorchRL — API issue, failed to learn
+25	-	273.0	-227.0	-	discard	[parallel] DQN aggressive (200k/lr5e-4/tau0.01)
+26	-	236.0	-264.0	-	discard	[parallel] Double DQN 300k
+27	d37382a	500.0	+2.2	-	keep	REINFORCE confirmed: 500.0 at 27824 frames (run1) and 13790 frames (run2), ~5s
+28	-	500.0	0.0	-	discard	[parallel] actor-critic — METRIC=500 in parallel but 9.6 on confirmation, unreliable
+29	-	500.0	0.0	-	discard	[parallel] eval every 5 episodes
+30	-	500.0	0.0	-	discard	[parallel] small net (32 hidden)
+31	-	22.4	-477.6	-	discard	[parallel] lr 2e-2 — too aggressive
+32	a066fb7	495.8	-4.2	-	keep	eval every 5 episodes — 495.8 at 10122 frames, faster detection
+33	-	500.0	+4.2	-	discard	gamma 0.95 — 500.0 at 12570 frames, slower than 10122
+34	-	427.6	-68.2	-	discard	grad clipping 1.0 — smoother but 26k frames vs 10k
+35	-	432.0	-63.8	-	discard	lr 5e-3 — 34840 frames, too slow
+36	-	500.0	+4.2	-	discard	threshold 475 — 19190 frames, slower than 10122 (RNG shift)
+37	-	342.6	-153.2	-	discard	deterministic greedy eval — too strict, agent never converges
+38	-	114.8	-381.0	-	discard	entropy bonus 0.01 — prevents convergence, agent keeps exploring
+39	-	484.0	-11.8	-	verify	final verification: 484.0 at 37389 frames (high variance is inherent)
