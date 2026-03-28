@@ -41,7 +41,7 @@ for episode in range(500):
     loss.backward()
     optimizer.step()
 
-    if episode % 10 == 0:
+    if episode % 5 == 0:
         eval_rewards = []
         for _ in range(5):
             e = gym.make("CartPole-v1")
