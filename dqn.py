@@ -31,7 +31,7 @@ for episode in range(500):
     returns = []
     G = 0
     for r in reversed(rewards_ep):
-        G = r + 0.95 * G
+        G = r + 0.99 * G
         returns.insert(0, G)
     returns = torch.FloatTensor(returns)
     returns = (returns - returns.mean()) / (returns.std() + 1e-8)
