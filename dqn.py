@@ -31,7 +31,7 @@ collector = SyncDataCollector(
 buffer = ReplayBuffer(storage=LazyTensorStorage(max_size=50_000))
 loss_fn = DQNLoss(policy, action_space=env.action_spec)
 loss_fn.make_value_estimator(gamma=0.99)
-updater = SoftUpdate(loss_fn, tau=0.001)
+updater = SoftUpdate(loss_fn, tau=0.005)
 optimizer = torch.optim.Adam(policy.parameters(), lr=1e-4)
 
 total_frames = 0
