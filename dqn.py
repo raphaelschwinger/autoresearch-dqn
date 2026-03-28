@@ -43,13 +43,13 @@ for episode in range(500):
 
     if episode % 5 == 0:
         eval_rewards = []
-        for seed in range(5):
+        for _ in range(5):
             e = gym.make("CartPole-v1")
-            o, _ = e.reset(seed=1000 + seed)
+            o, _ = e.reset()
             ep_r = 0
             for _ in range(500):
                 with torch.no_grad():
-                    a = policy(torch.FloatTensor(o)).argmax().item()
+                    a = Categorical(logits=policy(torch.FloatTensor(o))).sample().item()
                 o, r, term, trunc, _ = e.step(a)
                 ep_r += r
                 if term or trunc:
@@ -64,13 +64,13 @@ for episode in range(500):
 
 # Final eval
 final_rewards = []
-for seed in range(5):
+for _ in range(5):
     e = gym.make("CartPole-v1")
-    o, _ = e.reset(seed=2000 + seed)
+    o, _ = e.reset()
     ep_r = 0
     for _ in range(500):
         with torch.no_grad():
-            a = policy(torch.FloatTensor(o)).argmax().item()
+            a = Categorical(logits=policy(torch.FloatTensor(o))).sample().item()
         o, r, term, trunc, _ = e.step(a)
         ep_r += r
         if term or trunc:
