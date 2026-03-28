@@ -58,7 +58,7 @@ for episode in range(500):
             eval_rewards.append(ep_r)
         avg = sum(eval_rewards) / 5
         print(f"Episode {episode} ({total_frames} frames): reward={avg:.1f}")
-        if avg >= 475:
+        if avg >= 490:
             print(f"Goal achieved at {total_frames} frames!")
             break
 
