@@ -12,7 +12,7 @@ torch.manual_seed(0)
 env = GymEnv("CartPole-v1", categorical_action_encoding=True)
 
 qnet = TensorDictModule(
-    nn.Sequential(nn.Linear(4, 128), nn.ReLU(), nn.Linear(128, 128), nn.ReLU(), nn.Linear(128, 2)),
+    nn.Sequential(nn.Linear(4, 64), nn.ReLU(), nn.Linear(64, 64), nn.ReLU(), nn.Linear(64, 64), nn.ReLU(), nn.Linear(64, 2)),
     in_keys=["observation"],
     out_keys=["action_value"],
 )
