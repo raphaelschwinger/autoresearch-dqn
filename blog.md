@@ -124,11 +124,11 @@ The autoresearch loop's use of git as memory proved invaluable. Every experiment
 
 ## Final Numbers
 
-```
-DQN Baseline  → METRIC: 207.6 | ~421,000 frames | ~3 min
-DQN Optimized → METRIC: 500.0 | ~421,000 frames | ~3 min
-REINFORCE     → METRIC: 500.0 |  ~10,000 frames | ~5 sec
-```
+| Configuration | Commit | METRIC | Frames | Wall Time |
+|:--------------|:------:|-------:|-------:|----------:|
+| DQN Baseline | `2cb5664` | 207.6 | ~421,000 | ~3 min |
+| DQN Optimized (buffer + warmup + 3$\times$64 net) | `6c821f9` | 500.0 | ~421,000 | ~3 min |
+| REINFORCE (eval every 5 episodes) | `a066fb7` | 500.0 | ~10,000 | ~5 sec |
 
 **39 iterations. 4 keeps. 34 discards. 0 crashes. One algorithm switch that changed everything.**
 
